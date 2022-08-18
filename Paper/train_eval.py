@@ -71,15 +71,15 @@ def train(Trainloader,dev_iter,config, model):
                     last_improve = total_batch#记录最近一次loss下降的batch数
                 else:  # 验证集上没有变好
                     improve = ''
-                #msg = 'Iter: {0:>6},  Train Loss: {1:>5.2},  Train Acc: {2:>6.2%},  Val Loss: {3:>5.2},  Val Acc: {4:>6.2%}, {5}'
-                #print(msg.format(total_batch, loss.item(), train_acc, dev_loss, dev_acc, improve))
+                msg = 'Iter: {0:>6},  Train Loss: {1:>5.2},  Train Acc: {2:>6.2%},  Val Loss: {3:>5.2},  Val Acc: {4:>6.2%}, {5}'
+                print(msg.format(total_batch, loss.item(), train_acc, dev_loss, dev_acc, improve))
                 # log_writer.add_scalar("loss/train", loss.item(), total_batch)
                 # log_writer.add_scalar("loss/dev", dev_loss, total_batch)
                 # log_writer.add_scalar("acc/train", train_acc, total_batch)
                 # log_writer.add_scalar("acc/dev", dev_acc, total_batch)
                 model.train()
             total_batch += 1
-            if total_batch - last_improve > 2000:
+            if total_batch - last_improve > 1000:
                 # 验证集loss超过1000batch仍没下降，结束训练
                 print("No optimization for a long time, auto-stopping...")
                 flag = True
@@ -103,39 +103,6 @@ def test(config, model, test_iter):
     print(test_report)
     print("Confusion Matrix...")
     print(test_confusion)
-
-
-
-# def evaluate(config, model, data_iter, test=True):
-#
-#     model = model.cuda()  # 把网络模型放到gpu上
-#     model.eval()#测试的时候不要DropOut
-#     loss_total = 0#整个数据集data上全体样本的损失之和
-#     predict_all = np.array([], dtype=int)
-#     labels_all = np.array([], dtype=int)
-#     with torch.no_grad():
-#         for _,(texts, labels) in enumerate(data_iter):
-#             if torch.cuda.is_available():
-#                 texts, labels = texts.cuda(), labels.cuda()  # 把数据放到GPU上
-#             else:
-#                 pass
-#             outputs = model(texts)
-#             loss = F.cross_entropy(outputs, labels)
-#             loss_total += loss#loss是一batch上的loss，累加上
-#             labels = labels.data.cpu().numpy()
-#             predic = torch.max(outputs.data, 1)[1].cpu().numpy()
-#             labels_all = np.append(labels_all, labels)
-#             predict_all = np.append(predict_all, predic)
-#     acc = metrics.accuracy_score(labels_all, predict_all)#计算全体样本的准确率
-#     if test:
-#         #report = metrics.classification_report(labels_all, predict_all, target_names=config.class_list, digits=4)
-#         confusion = metrics.confusion_matrix(labels_all, predict_all, normalize='true')
-#         print(confusion)
-#         disp = ConfusionMatrixDisplay(confusion_matrix=confusion)
-#         disp.plot(cmap='Greens')
-#         plt.show()
-#         return acc, loss_total / len(data_iter), None,confusion
-#     return acc, loss_total / len(data_iter)
 
 def evaluate(config, model, data_iter, test=False):
     '''

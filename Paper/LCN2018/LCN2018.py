@@ -68,5 +68,4 @@ class LCN2018(nn.Module):
         x = self.fc1(x)
         x = self.fc2(x)
         x = self.output(x)
-        out = f.softmax(x, dim=1)
         return out

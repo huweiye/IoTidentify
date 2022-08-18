@@ -7,6 +7,8 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 解决中文显示问题
+plt.rcParams['axes.unicode_minus'] = False  # 解决中文显示问题
 import unittest
 
 Mac2Label={
@@ -58,8 +60,8 @@ Mac2DeviceName = {
     "08:21:ef:3b:fc:e3": "Samsung Galaxy Tab",
 }
 LanMac = "14:cc:20:51:33:ea"
-SeqLen=10 #每条流只提取前15个数据包的特征?
-EmbeddingSize=30#自己算出来的
+SeqLen=10 #每条流只提取前10个数据包的特征
+EmbeddingSize=22#自己算出来的
 LabelNum=len(Mac2Label)
 Mac2PacketFeatureList = {}  # 每个mac一个列表，列表长度是15的倍数，元素是packetFeature对象
 Mac2PktNums={}#mac:包数目
@@ -97,29 +99,29 @@ def packet2embedding(pkt:packetFeature)->list:
     '''
     embedding=[]
 
-    embedding.append(float(pkt.dir))#int
+    embedding.append(float(pkt.dir))#int，1
 
-    embedding.append(float(pkt.deltaTime))#str
+    embedding.append(float(pkt.deltaTime))#str，1+1=2
 
-    tos_oneHot=bin(int(pkt.tos,16))[2:].rjust(8,'0')#str
-    for element in tos_oneHot:
-        embedding.append(float(element))
+    # tos_oneHot=bin(int(pkt.tos,16))[2:].rjust(8,'0')#str，2+8=10
+    # for element in tos_oneHot:
+    #     embedding.append(float(element))
 
-    embedding.append(float(pkt.ttl))#int
+    embedding.append(float(pkt.ttl))#int，10+1=11
 
-    embedding.append(float(pkt.udpORtcp))#int
+    embedding.append(float(pkt.udpORtcp))#int，11+1=12
 
-    server_port_oneHot=bin(pkt.port)[2:].rjust(16,'0') #服务器端端口号是离散值，因为要转换成16位的one-hot
+    server_port_oneHot=bin(pkt.port)[2:].rjust(16,'0') #服务器端端口号是离散值，因为要转换成16位的one-hot，12+16=28
     for element in server_port_oneHot:
         embedding.append(float(element))
 
-    embedding.append(float(pkt.win))#int
+    embedding.append(float(pkt.win))#int，28+1=29
 
     # tcpOptions=bin(int(pkt.opt,16))[2:]
     # for element in tcpOptions:
     #     embedding.append(float(element))
 
-    embedding.append(float(pkt.frameLen))#int
+    embedding.append(float(pkt.frameLen))#int，29+1=30
 
     return embedding
 
@@ -178,16 +180,20 @@ def getTCPOptions(tcpOptionList,pktIndex):#只取后10个字节，需转换成8*
 def printMacPktNum():#打印每个mac的数据包总数
     macLabel=[]
     pktNumList = []
-    for mac, deviceName in Mac2DeviceName.items():
+    pktNumSum=0
+    for mac, label in Mac2Label.items():
         if mac not in Mac2PktNums.keys():
             print("not exist device:", Mac2DeviceName[mac])
             continue
         pktNum=Mac2PktNums[mac]
-        print("device {}  packet number= {}".format(Mac2DeviceName[mac], pktNum))
+        pktNumSum+=pktNum
         pktNumList.append(pktNum)
-        macLabel.append(deviceName)
+        macLabel.append(label)
 
-    plt.figure(figsize=(20, 10))
+    for index in range(len(pktNumList)):
+        print("device {} packet number= {},which proportion={:.1%}".format(macLabel[index], pktNumList[index],
+                                                                          pktNumList[index] / pktNumSum))
+    plt.figure(figsize=(30, 20))
     plt.pie(pktNumList, labels=macLabel, autopct='%3.1f%%', pctdistance=0.8)
     plt.title('Iot设备包数目占比图')  # 加标题
     plt.show()
@@ -272,13 +278,59 @@ def genData():
     np.savetxt(r'../../data/TMC2018_label.csv', label, delimiter=',')
 
     for deviceMac,pktFeatureList in Mac2PacketFeatureList.items():
-        print("device {} sample count= {},which proportion={}".format(Mac2DeviceName[deviceMac],len(pktFeatureList),len(pktFeatureList)/data.shape[0]))
+        print("device {} sample count= {},which proportion={:.1%}".format(Mac2Label[deviceMac],len(pktFeatureList),len(pktFeatureList)/data.shape[0]))
 
+def classifyIot():
+    from sklearn.metrics import confusion_matrix
+    from sklearn.metrics import ConfusionMatrixDisplay
+    import pandas as pd
+    df_data = pd.read_csv(r"../../data/TMC2018_data.csv", header=None, sep=',', low_memory=False)
+    df_label = pd.read_csv(r"../../data/TMC2018_label.csv", header=None, sep=',', low_memory=False)
+    data = df_data.values
+    label = df_label.values
+    scaler = preprocessing.MinMaxScaler(feature_range=(0, 1)).fit(data)
+    data = scaler.transform(data)
+    data = data.reshape(-1, SeqLen, EmbeddingSize)
+    label = label.reshape(label.size)
+    X_train, X_test, y_train, y_test = train_test_split(data, label, test_size=0.3, random_state=42)
+    X_train=X_train.reshape(-1,SeqLen*EmbeddingSize)
+    X_test=X_test.reshape(-1,SeqLen*EmbeddingSize)
+    from sklearn.ensemble import RandomForestClassifier
+    rfc = RandomForestClassifier(random_state=1)
+    rfc.fit(X_train, y_train)
+    score_r = rfc.score(X_test, y_test)
+    print("Random Forest score for IoT classify:{}".format(score_r))
+    y_predict = rfc.predict(X_test)
+    maxtrix = confusion_matrix(y_test, y_predict, normalize='true')
+    disp = ConfusionMatrixDisplay(confusion_matrix=maxtrix)
+    fig, ax = plt.subplots(figsize=(20, 10))
+    disp.plot(cmap='Greens', ax=ax)
+    plt.show()
+
+    # save model
+    import pickle
+    f = open('rfc.pickle', 'wb+')
+    pickle.dump(rfc, f)
+    f.close()
+
+'''对随机森林模型做十倍交叉验证
+rfc_l = []
+for i in range(10):
+    rfc = RandomForestClassifier(n_estimators=25)
+    rfc_s = cross_val_score(rfc, data, label, cv=10).mean()
+    rfc_l.append(rfc_s)
+plt.plot(range(1, 11), rfc_l, label="Random Forest")
+plt.legend(title='10-fold cross-validation')
+plt.show()
+'''
 class TestSklearn(unittest.TestCase):
     def test_utils(self):
         genMac2PacketFeatureList()
         printMacPktNum()
         genData()
+
+    def test_RF(self):
+        classifyIot()
 
     def test_others(self):
         mat1=[

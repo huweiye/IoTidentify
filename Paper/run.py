@@ -6,10 +6,12 @@ import os
 from pathlib import Path
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
-#from Paper.MyMethod.BiLSTM import BiLSTM
-#from Paper.MyMethod.BiLSTM import Config
+#from Paper.MyMethod.BiLSTM_Att import Model
+#from Paper.MyMethod.BiLSTM_Att import Config
 from Paper.MyMethod.BiLSTM import Model#模型，可选
 from Paper.MyMethod.BiLSTM import Config #模型参数，可选
+from Paper.MyMethod.CNNBiLSTM import Model#模型，可选
+from Paper.MyMethod.CNNBiLSTM import Config #模型参数，可选
 
 data_file=r"../data/TMC2018_data.csv"
 label_file=r"../data/TMC2018_label.csv"
@@ -51,7 +53,7 @@ if __name__ == '__main__':
 
     #8:1:1划分训练集 验证集 测试集
     X, test_data, Y, test_label = train_test_split(data, label, test_size=0.1,random_state=1)
-    train_data,valid_data,train_label,valid_label=train_test_split(X,Y,test_size=0.125)
+    train_data,valid_data,train_label,valid_label=train_test_split(X,Y,test_size=0.125,random_state=1)
 
     train_data = torch.FloatTensor(train_data)  # 训练数据必须是float
     train_label = torch.LongTensor(train_label)  # 标签

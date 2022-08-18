@@ -56,14 +56,14 @@ class AlexNet(torch.nn.Module):
         '''6：一个全连接层'''
         self.fullConnect1 = nn.Sequential(
             # intput[128,6,6],打平成一维：一行是一个样本，所以一个样本共有128*6*6=4608个维度，实际上训练的时候数据张量的[0]维是batch_size，所以x=torch.flatten(x, start_dim=1)
-            nn.Dropout(p=0.5),  # 在训练的时候每个神经元以0,5的概率停止工作
             nn.Linear(in_features=128 * 6 * 6, out_features=2048),
+            nn.Dropout(p=0.5),  # 在训练的时候每个神经元以0,5的概率停止工作
             nn.ReLU(inplace=True)
         )
         '''7:一个全连接层'''
         self.fullConnect2 = nn.Sequential(
-            nn.Dropout(p=0.5),
             nn.Linear(in_features=2048, out_features=2048),
+            nn.Dropout(p=0.5),
             nn.ReLU(inplace=True)
         )
         '''8:输出层'''
