@@ -2,16 +2,10 @@ import torch
 import numpy as np
 from Paper import train_eval
 import pandas as pd
-import os
-from pathlib import Path
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
-#from Paper.MyMethod.BiLSTM_Att import Model
-#from Paper.MyMethod.BiLSTM_Att import Config
 from Paper.MyMethod.BiLSTM import Model#模型，可选
 from Paper.MyMethod.BiLSTM import Config #模型参数，可选
-from Paper.MyMethod.CNNBiLSTM import Model#模型，可选
-from Paper.MyMethod.CNNBiLSTM import Config #模型参数，可选
 
 data_file=r"../data/TMC2018_data.csv"
 label_file=r"../data/TMC2018_label.csv"
