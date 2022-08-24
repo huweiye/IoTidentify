@@ -11,7 +11,7 @@ class Config(object):
     """配置参数"""
     def __init__(self,SeqLen,LabelNum,EmbeddingSize,Epoch,classList):
         self.batch_size = 128
-        self.num_feature = EmbeddingSize  # 词向量的维数，LSTM的第一个参数值，对dport进行embedding后是30
+        self.num_feature = EmbeddingSize  # 词向量的维数
         self.num_labels = LabelNum#类别数目
         self.hidden_size = 64  # LSTM的隐藏层维度，论文中取64
         self.num_layers = 2  # LSTM的深度,（在竖直方向堆叠的多个LSTM单元的层数）,论文中为1

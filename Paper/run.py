@@ -4,11 +4,14 @@ from Paper import train_eval
 import pandas as pd
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
-from Paper.MyMethod.BiLSTM import Model#模型，可选
-from Paper.MyMethod.BiLSTM import Config #模型参数，可选
-
-data_file=r"../data/TMC2018_data.csv"
-label_file=r"../data/TMC2018_label.csv"
+'''模型和参数选型'''
+from Paper.MyMethod.BiLSTM_Att import Model#模型，可选
+from Paper.MyMethod.BiLSTM_Att import Config #模型参数，可选
+from Paper.MyMethod.payloadUtil import DataFilePath #data文件
+from Paper.MyMethod.payloadUtil import LabelFilePath #label文件
+from Paper.MyMethod.payloadUtil import SeqLen
+from Paper.MyMethod.payloadUtil import EmbeddingSize
+from Paper.MyMethod.payloadUtil import LabelNum
 
 if __name__ == '__main__':
     np.random.seed(1)
@@ -21,9 +24,6 @@ if __name__ == '__main__':
                #"Blipcare Blood Pressure meter",
                "Withings Aura smart sleep sensor",
                "Light Bulbs LiFX Smart Bulb","Triby Speaker","PIX-STAR Photo-frame","HP Printer","Samsung Galaxy Tab"]
-    from Paper.MyMethod.utils import SeqLen
-    from Paper.MyMethod.utils import EmbeddingSize
-    from Paper.MyMethod.utils import LabelNum
     config = Config(SeqLen=SeqLen,LabelNum=LabelNum,EmbeddingSize=EmbeddingSize,Epoch=20,classList=classList)
     model = Model(config)  # 网络模型
 
@@ -32,8 +32,8 @@ if __name__ == '__main__':
     num_labels=config.num_labels#类别数目
 
     #head=None，必须存在，否则read_csv会把文件第一行当做列标签而忽略
-    df_data = pd.read_csv(data_file, header=None,sep=',', low_memory=False)
-    df_label=pd.read_csv(label_file,header=None, sep=',', low_memory=False)
+    df_data = pd.read_csv(DataFilePath, header=None,sep=',', low_memory=False)
+    df_label=pd.read_csv(LabelFilePath,header=None, sep=',', low_memory=False)
     data = df_data.values
     label=df_label.values
 

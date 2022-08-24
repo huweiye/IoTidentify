@@ -34,6 +34,8 @@ LanMac = "14:cc:20:51:33:ea"
 SeqLen=8 #灰度图的行数
 EmbeddingSize=128#灰度图的列数，SeqLen*EmbeddingSize需要等于2_Process2Session.ps1文件里的截取长度
 LabelNum=len(Mac2Label)
+DataFilePath=r'D:\Documents\shj\胡伟业我的\iie\PytorchProject\Pytorch\data/TMC2018_payload_data.csv'
+LabelFilePath=r'D:\Documents\shj\胡伟业我的\iie\PytorchProject\Pytorch\data/TMC2018_payload_label.csv'
 
 
 def getMatrixfrom_pcap(filename, width):
@@ -94,8 +96,8 @@ def genData():
 
     print("data's shape=", data.shape)
     print("label's shape=", label.shape)
-    np.savetxt(r'../../data/lcn2018_payload_data.csv', data, delimiter=',')
-    np.savetxt(r'../../data/lcn2018_payload_label.csv', label, delimiter=',')
+    np.savetxt(DataFilePath, data, delimiter=',')
+    np.savetxt(LabelFilePath, label, delimiter=',')
 
 
 
