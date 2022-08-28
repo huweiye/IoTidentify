@@ -332,21 +332,6 @@ class TestSklearn(unittest.TestCase):
     def test_RF(self):
         classifyIot()
 
-    def test_others(self):
-        mat1=[
-            [
-            [1,2,3],[4,5,6]
-               ],
-            [
-                [7,8,9],[10,11,12]
-            ]
-        ]
-        mat1=np.array(mat1)
-        print("mat1 shape={}".format(mat1.shape))
-        mat1=mat1.reshape(2,-1)
-        print(mat1)
-        print("mat1 reshape shape={}".format(mat1.shape))
-
     def test_label(self):#确定一下到底有哪些设备
         hasDevice=set( )
         extensions = ["eth.src", "eth.dst"]
@@ -368,6 +353,20 @@ class TestSklearn(unittest.TestCase):
         for deviceMac in Mac2Label.keys():
             if deviceMac not in hasDevice:
                 print(deviceMac+"NOT EXIST!!!")
+    def test_featureIot(self):#展示不同的设备在协议栈实现上的不同
+        sampleMac2Name = {
+            "d0:73:d5:01:83:08": "Light Bulbs LiFX Smart Bulb",  # 智能灯泡，能源设备
+            "70:5a:0f:e4:9b:c0": "HP Printer",  # 打印机，办公设备
+            "44:65:0d:56:cc:d3": "Amazon Echo",  # 控制设备
+            "70:ee:50:03:b8:ac": "Netatmo weather station",  # 传感器设备
+            "f4:f2:6d:93:51:f1": "TP-Link Day Night Cloud camera",  # 视频设备
+            "40:f3:08:ff:1e:da": "Non-Iot",
+            "74:2f:68:81:69:42": "Non-Iot",
+            "ac:bc:32:d4:6f:2f": "Non-Iot",
+            "b4:ce:f6:a7:a3:c2": "Non-Iot",
+            "d0:a6:37:df:a1:e1": "Non-Iot",
+            "f4:5c:89:93:cc:85": "Non-Iot",
+        }
 
 
 

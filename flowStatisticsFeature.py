@@ -10,7 +10,6 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
-
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 解决中文显示问题
 plt.rcParams['axes.unicode_minus'] = False  # 解决中文显示问题
 from sklearn.metrics import confusion_matrix
@@ -250,7 +249,6 @@ def myDrawing():  # 画出不同IoT设备包数的分布
 
         plt.figure(figsize=(20, 10))
         plt.pie(flowNumList, labels=macLabel, autopct='%3.1f%%', pctdistance=0.8)
-
         plt.title('Iot设备流数目占比图')  # 加标题
         plt.show()
 

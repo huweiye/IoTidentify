@@ -39,10 +39,10 @@ class Model(torch.nn.Module):
         self.fc=torch.nn.Sequential(
             torch.nn.Dropout(p=config.dropout),
             #如果只取最后一个时间步则in_features=config.hidden_size*2
-            torch.nn.Linear(in_features=config.hidden_size*2*config.seq_len, out_features=64),#线性层的输入是二维张量，其中第0维度一定是样本，第1维度才是每个样本的特征数
+            torch.nn.Linear(in_features=config.hidden_size*2*config.seq_len, out_features=120),#线性层的输入是二维张量，其中第0维度一定是样本，第1维度才是每个样本的特征数
             torch.nn.ReLU(inplace=True)
         )
-        self.output=torch.nn.Linear(in_features=64, out_features=config.num_labels)
+        self.output=torch.nn.Linear(in_features=120, out_features=config.num_labels)
 
     def forward(self, x):
         rnnOutput, _ = self.rnn(x)# [batch_size, seq_len, hidden_size * num_direction]=[128, 10, 128]

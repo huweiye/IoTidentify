@@ -1,4 +1,5 @@
 # coding: UTF-8
+import itertools
 import torch
 from sklearn import metrics
 import torch.nn.functional as F
@@ -125,14 +126,47 @@ def evaluate(config, model, data_iter, test=False):
             predic = torch.max(outputs.data, 1)[1].cpu().numpy()
             labels_all = np.append(labels_all, labels)
             predict_all = np.append(predict_all, predic)
-
     acc = metrics.accuracy_score(labels_all, predict_all)
     if test:
         report = metrics.classification_report(labels_all, predict_all, target_names=config.class_list, digits=4)
-        confusion = metrics.confusion_matrix(labels_all, predict_all,normalize='true')
-        disp = ConfusionMatrixDisplay(confusion_matrix=confusion)
-        fig, ax = plt.subplots(figsize=(20, 10))
-        disp.plot(cmap='Greens',ax=ax)
+        confusion = metrics.confusion_matrix(labels_all, predict_all)
+
+        plot_confusion_matrix(confusion,config.class_list,normalize=True)
+        #disp = ConfusionMatrixDisplay(confusion_matrix=confusion)
+        #fig, ax = plt.subplots(figsize=(20, 10))
+        #disp.plot(cmap='Greens',ax=ax)
         plt.show()
         return acc, loss_total / len(data_iter), report, confusion
     return acc, loss_total / len(data_iter)
+
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    plt.title(title)
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        cm = np.round(cm, 2)  # 保留两位有效数字
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+    print(cm)
+    plt.imshow(cm, interpolation='nearest', cmap=cmap,aspect ='auto')#将数组的值以图片的形式展示出来,数组的值对应着不同的颜色深浅,而数值的横纵坐标就是数组的索引
+    plt.colorbar()
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, cm[i, j],
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
