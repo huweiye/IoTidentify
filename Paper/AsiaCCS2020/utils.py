@@ -12,108 +12,105 @@ import pandas as pd
 '''
 
 #在进行自定义数据集的标签设置时，不能从1开始，而是从0开
-MACAddress2Label = {
-    "88:71:e5:ed:be:c7": 0,  # echo dot
-    "f4:f5:d8:db:61:84": 1,  # google home
-    "18:bc:5a:19:eb:7d": 2,  # tmall assist
-    "78:11:dc:e1:f0:6b": 3,  # xiaomi hub
-    "b0:59:47:34:16:ff": 4,  # 360 camera
-    "78:11:dc:cf:c8:f1": 5,  # xiaobai camera
-    "30:20:10:fb:7c:05": 6,  # tplink plug
-    "b4:e6:2d:08:63:0c": 7,  # orvibo plug
-    "78:0f:77:1b:00:8c": 8,  # broadlink plug
-    "28:6c:07:87:54:b0": 9,  # mitu story teller
-    "00:62:6e:51:27:2e": 10,  # Insteon Camera
-    "a4:50:46:06:80:43": 10,  # xiaomi mobile
-    "20:a6:0c:5a:42:10": 10,  # xiaomi tablet
-    "28:3f:69:05:2d:b0": 10,  # sony mobile
-    "44:80:eb:21:cb:95": 10,  # motorola mobile
+Mac2Label = {
+    "d0:52:a8:00:67:5e": 0,  # Smart Things
+    "44:65:0d:56:cc:d3": 1,  # Amazon Echo
+    "70:ee:50:18:34:43": 2,  # Netatmo Welcome
+    "f4:f2:6d:93:51:f1": 3,  # TP-Link Day Night Cloud camera
+    "00:16:6c:ab:6b:88": 4,  # Samsung SmartCam
+    "30:8c:fb:2f:e4:b2": 5,  # Dropcam
+    "00:62:6e:51:27:2e": 6,  # Insteon Camera
+    "00:24:e4:11:18:a8": 7,  # Withings Smart Baby Monitor
+    "ec:1a:59:79:f4:89": 8,  # Belkin Wemo switch
+    "50:c7:bf:00:56:39": 9,  # TP-Link Smart plug
+    "74:c6:3b:29:d7:1d": 10,  # iHome
+    "ec:1a:59:83:28:11": 11,  # Belkin wemo motion sensor
+    #"18:b4:30:25:be:e4": 12,  # NEST Protect smoke alarm
+    "70:ee:50:03:b8:ac": 12,  # Netatmo weather station
+    "00:24:e4:1b:6f:96": 13,  # Withings Smart scale
+    #"74:6a:89:00:2e:25": 15,  # Blipcare Blood Pressure meter
+    "00:24:e4:20:28:c6": 14,  # Withings Aura smart sleep sensor
+    "d0:73:d5:01:83:08": 15,  # Light Bulbs LiFX Smart Bulb
+    "18:b7:9e:02:20:44": 16,  # Triby Speaker
+    "e0:76:d0:33:bb:85": 17,  # PIX-STAR Photo-frame
+    "70:5a:0f:e4:9b:c0": 18,  # HP Printer
+    "08:21:ef:3b:fc:e3": 19,  # Samsung Galaxy Tab
 }
 Device2Stream = dict()#label:packet_embedding的列表
-EmbeddingSize=11
-TimeWindowSize=100#论文中的时间窗口，取100个数据包，相当于seq_len's=100
-
-'''
-packet_embedding[0]=dport
-packet_embedding[1]=if ip
-[2]=if tcp
-[3]=if udp
-[4]=if tls
-[5]=if http
-[6]=if dns
-[7]=if other protocols
-[8]=dir
-[9]=packet size
-[10]=time interval
-'''
-def my_cmp(x, y):
-    if x[10] > y[10]:
-        return 1
-    if x[10] < y[10]:
-        return 1
-    return 0
-
+EmbeddingSize=9+16
+SeqLen=100#论文中的时间窗口，取100个数据包，相当于seq_len's=100
+LabelNum=len(Mac2Label)
+Mac2PacketFeatureList = {}  # 每个mac一个列表，列表长度是10的倍数，元素是packetFeature对象
+OriginDataFilePath=r'D:\Documents\shj\胡伟业我的\iie\PytorchProject\Pytorch\data/AsiaCCS2020_data.csv'
+OriginLabelFilePath=r'D:\Documents\shj\胡伟业我的\iie\PytorchProject\Pytorch\data/AsiaCCS2020_label.csv'
 def load_dataset():
-    extensions=["eth.src", "eth.dst","frame.len","frame.time_epoch","ip","tcp","udp","tls","http","dns",
-                "arp","ppp","icmp","ipv6","igmp","ah","esp","dccp","sctp","rtp","rtcp","smtp","ancp","dhcp","ftp","imap","nntp","ntp","pop","rsip","ssh","snmp","telnet","tftp","ssdp","mdns","quic","ndmp","its"]#目的端口（value.dport）在flowcontainer中默认提取了
-    file_dir = r"../../../../../../DataSet/DataSet/IoT identification/Aisia CCS2020-Your smart home can't keep a " \
-               r"secret Towards automated fingerprinting of iot traffic/iot-traffic-dataset"
-    for file in getFiles(file_dir, '.pcapng'):
-        packetlist = extract(infile=file, filter="", extension=extensions)
-        for p in packetlist:
-            packet_embedding=[0.0 for x in range(0,EmbeddingSize)]
-            extension_list = p[10]  # flowcontainer/reader.py:10) extension(s)
-            device_mac=""
-            if extension_list[0] in MACAddress2Label.keys():#数据包p的源mac是设备之一，说明是出站包
-                packet_embedding[8]=1.0#feature:dir
-                device_mac=extension_list[0]
-            else:#目的mac是设备，说明是入站++包
-                device_mac = extension_list[1]
-            packet_embedding[0]=float(p[8])#feature:dport
-            packet_embedding[9]=float(extension_list[2])#feature:frame len
-            packet_embedding[10]=float(extension_list[3])#feature:epoch time
-            if extension_list[4]!='':
-                packet_embedding[1]=1.0
-            if extension_list[5]!='':
-                packet_embedding[2]=1.0
-            if extension_list[6]!='':
-                packet_embedding[3]=1.0
-            if extension_list[7]!='':
-                packet_embedding[4]=1.0
-            if extension_list[8]!='':
-                packet_embedding[5]=1.0
-            if extension_list[9]!='':
-                packet_embedding[6]=1.0
-            for i in range(10,len(extension_list)):#有一个满足就使packet_embedding[7]=1
-                if extension_list[i]!='':
-                    packet_embedding[7] = 1
-            if device_mac not in Device2Stream:
-                Device2Stream[device_mac] = []
-            Device2Stream[device_mac].append(packet_embedding)#当前设备的数据包
+    extensions=["eth.src", "eth.dst","frame.len","frame.time_delta","ip","tcp","udp","tls","http","dns"]#目的端口（value.dport）在flowcontainer中默认提取了
+    file_dir =  r"../../../../../../DataSet/DataSet/IoT identification/TMC2018/TMC2018/test"
+    for file in getFiles(file_dir, '.pcap'):
+        flowDict = extract(infile=file, extension=extensions)
+        for key in flowDict.keys():  # 遍历每条流
+            flow = flowDict[key]
+            srcMacList = flow.extension['eth.src']
+            dstMacList = flow.extension['eth.dst']
+            frameLenList=flow.extension['frame.len']
+            timeEpoch=flow.extension['frame.time_delta']
+            ipList=flow.extension['ip'] if 'ip' in flow.extension.keys() else []
+            tcpList=flow.extension['tcp'] if 'tcp' in flow.extension.keys() else []
+            udpList=flow.extension['udp'] if 'udp' in flow.extension.keys() else []
+            tlsList=flow.extension['tls'] if 'tls' in flow.extension.keys() else []
+            httpList=flow.extension['http'] if 'http' in flow.extension.keys() else []
+            dnsList=flow.extension['dns'] if 'dns' in flow.extension.keys() else []
+            dport=flow.dport
+            dportOneHot=[]
+            for s in str(bin(dport)[2:]).rjust(16,'0'):
+                dportOneHot.append(float(s))
+            deviceMac = ""
+            maxPktNum=len(frameLenList)#一条流的包数目
+            if srcMacList[0][0] in Mac2Label.keys():
+                deviceMac = srcMacList[0][0]
+            elif dstMacList[0][0] in Mac2Label.keys():
+                deviceMac = dstMacList[0][0]
+            else:  # 不是已知设备，忽略当前流
+                continue
+            if deviceMac not in Mac2PacketFeatureList:#当前mac还没有任何元素
+                Mac2PacketFeatureList[deviceMac] = []
+            for packetIndex in range(0,maxPktNum):
+                pkt=[]
+                pkt.extend(dportOneHot)
+                pkt.append(float(len(ipList)!=0))
+                pkt.append(float(len(tcpList) != 0))
+                pkt.append(float(len(udpList) != 0))
+                pkt.append(float(len(tlsList) != 0))
+                pkt.append(float(len(httpList) != 0))
+                pkt.append(float(len(dnsList) != 0))
+                pkt.append(float(srcMacList[packetIndex][0]==deviceMac))
+                pkt.append(float(frameLenList[packetIndex][0]))
+                pkt.append(float(timeEpoch[packetIndex][0]))
+                #print(pkt)
+                Mac2PacketFeatureList[deviceMac].append(pkt)
+
+def genData():
     data=[]
     label=[]
-    for device, pack_list in Device2Stream.items():
-        pack_list.sort(key=functools.cmp_to_key(my_cmp))#按照epoch time 从小到大进行排序
-        #compute time interval from the epoch time between two adjacent packets in one time window
-        for num_window in range(0,min(5000,len(pack_list)//100)):#每个设备最多5000个窗口
-            seq=[]
-            for i in range(num_window*TimeWindowSize,num_window*TimeWindowSize+TimeWindowSize):
-                if i==num_window*TimeWindowSize:
-                    pack_list[i][10]=0.0
-                else:
-                    pack_list[i][10]-=pack_list[i-1][10]#计算和上一个包的间隔时间
-                seq.append(pack_list[i])
-            data.append(seq)
-            label.append(MACAddress2Label[device])
-
+    for deviceMac,pktFeatureList in Mac2PacketFeatureList.items():
+        i=0
+        sampleNum=SeqLen*(len(pktFeatureList)//SeqLen)
+        for pktIndex in range(sampleNum):
+            data.append(pktFeatureList[pktIndex])
+            if i%SeqLen==0:
+                label.append(Mac2Label[deviceMac])
+            i+=1
     data = np.array(data)
     label = np.array(label)
-    data = data.reshape(-1, EmbeddingSize)
-    label = label.reshape(-1, 1)
     print("AsiaCCS2020 data's shape=", data.shape)
     print("AsiaCCS2020 label's shape=", label.shape)
-    np.savetxt(r'../../data/AsiaCCS2020_data.csv', data, delimiter=',')
-    np.savetxt(r'../../data/AsiaCCS2020_label.csv', label, delimiter=',')
+    np.savetxt(OriginDataFilePath, data, delimiter=',')
+    np.savetxt(OriginLabelFilePath, label, delimiter=',')
+
+    for deviceMac,pktFeatureList in Mac2PacketFeatureList.items():
+        print("device {} sample count= {},which proportion={:.1%}".format(Mac2Label[deviceMac],len(pktFeatureList),len(pktFeatureList)/data.shape[0]))
+
+
 
 
 def getFiles(dir, suffix):  # 查找根目录，文件后缀
@@ -130,3 +127,4 @@ def getFiles(dir, suffix):  # 查找根目录，文件后缀
 class TestLoadData(unittest.TestCase):
     def test_utils(self):
         load_dataset()
+        genData()

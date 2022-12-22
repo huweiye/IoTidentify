@@ -14,7 +14,7 @@ plt.rcParams['font.sans-serif'] = ['SimHei']  # 解决中文显示问题
 plt.rcParams['axes.unicode_minus'] = False  # 解决中文显示问题
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
-
+import seaborn as sns
 '''
 Mac2Label={
 "d0:52:a8:00:67:5e":0 ,#Smart Things
@@ -39,12 +39,12 @@ Mac2Label={
 "e0:76:d0:33:bb:85":19 ,#PIX-STAR Photo-frame
 "70:5a:0f:e4:9b:c0":20 ,#HP Printer
 "08:21:ef:3b:fc:e3":21 ,#Samsung Galaxy Tab
-"40:f3:08:ff:1e:da":22 ,#Non-Iot
-"74:2f:68:81:69:42":22 ,#Non-Iot
-"ac:bc:32:d4:6f:2f":22 ,#Non-Iot
-"b4:ce:f6:a7:a3:c2":22 ,#Non-Iot
-"d0:a6:37:df:a1:e1":22 ,#Non-Iot
-"f4:5c:89:93:cc:85":22 ,#Non-Iot
+"40:f3:08:ff:1e:da":21 ,#Non-Iot
+"74:2f:68:81:69:42":21 ,#Non-Iot
+"ac:bc:32:d4:6f:2f":21 ,#Non-Iot
+"b4:ce:f6:a7:a3:c2":21 ,#Non-Iot
+"d0:a6:37:df:a1:e1":21 ,#Non-Iot
+"f4:5c:89:93:cc:85":21 ,#Non-Iot
 }
 '''
 Mac2Label = {
@@ -69,7 +69,7 @@ Mac2Label = {
     "18:b7:9e:02:20:44": 0,  # Triby Speaker
     "e0:76:d0:33:bb:85": 0,  # PIX-STAR Photo-frame
     "70:5a:0f:e4:9b:c0": 0,  # HP Printer
-    "08:21:ef:3b:fc:e3": 0,  # Samsung Galaxy Tab
+    "08:21:ef:3b:fc:e3": 1,  # Samsung Galaxy Tab
     "40:f3:08:ff:1e:da": 1,  # Non-Iot
     "74:2f:68:81:69:42": 1,  # Non-Iot
     "ac:bc:32:d4:6f:2f": 1,  # Non-Iot
@@ -78,28 +78,28 @@ Mac2Label = {
     "f4:5c:89:93:cc:85": 1,  # Non-Iot
 }
 Mac2DeviceName = {
-    "d0:52:a8:00:67:5e": "Smart Things",
-    "44:65:0d:56:cc:d3": "Amazon Echo ",
-    "70:ee:50:18:34:43": "Netatmo Welcome",
-    "f4:f2:6d:93:51:f1": "TP-Link Day Night Cloud camera",
-    "00:16:6c:ab:6b:88": "Samsung SmartCam",
-    "30:8c:fb:2f:e4:b2": "Dropcam",
-    "00:62:6e:51:27:2e": "Insteon Camera",
-    "00:24:e4:11:18:a8": "Withings Smart Baby Monitor",
-    "ec:1a:59:79:f4:89": "Belkin Wemo switch",
-    "50:c7:bf:00:56:39": "TP-Link Smart plug",
-    "74:c6:3b:29:d7:1d": "iHome",
-    "ec:1a:59:83:28:11": "Belkin wemo motion sensor",
-    "18:b4:30:25:be:e4": "NEST Protect smoke alarm",
-    "70:ee:50:03:b8:ac": "Netatmo weather station",
-    "00:24:e4:1b:6f:96": "Withings Smart scale",
-    "74:6a:89:00:2e:25": "Blipcare Blood Pressure meter",
-    "00:24:e4:20:28:c6": "Withings Aura smart sleep sensor",
-    "d0:73:d5:01:83:08": "Light Bulbs LiFX Smart Bulb",
-    "18:b7:9e:02:20:44": "Triby Speaker",
-    "e0:76:d0:33:bb:85": "PIX-STAR Photo-frame",
-    "70:5a:0f:e4:9b:c0": "HP Printer",
-    "08:21:ef:3b:fc:e3": "Samsung Galaxy Tab",
+    "d0:52:a8:00:67:5e": "Samsung Smart Things",#Audio
+    "44:65:0d:56:cc:d3": "Amazon Echo",#Audio
+    "70:ee:50:18:34:43": "Netatmo Welcome",#Camera
+    "f4:f2:6d:93:51:f1": "TP-Link Day Night Cloud camera",#Camera
+    "00:16:6c:ab:6b:88": "Samsung SmartCam",#Camera
+    "30:8c:fb:2f:e4:b2": "Dropcam",#Camera  ,google子公司nest收购
+    "00:62:6e:51:27:2e": "Insteon Camera",#,Camera  ,2022年4月倒闭
+    "00:24:e4:11:18:a8": "Withings Smart Baby Monitor",#Camera,  法国公司
+    "ec:1a:59:79:f4:89": "Belkin Wemo switch",#Electronic Switch,贝尔金公司
+    "50:c7:bf:00:56:39": "TP-Link Smart plug",#Electronic Switch,
+    "74:c6:3b:29:d7:1d": "iHome power plug",#Electronic Switch,
+    "ec:1a:59:83:28:11": "Belkin wemo motion sensor",#Sensor
+    "18:b4:30:25:be:e4": "NEST Protect smoke alarm",#Sensor
+    "70:ee:50:03:b8:ac": "Netatmo weather station",#Sensor
+    "00:24:e4:1b:6f:96": "Withings Smart scale",#Sensor
+    "74:6a:89:00:2e:25": "Blipcare Blood Pressure meter",#Sensor
+    "00:24:e4:20:28:c6": "Withings Aura smart sleep sensor",#Sensor
+    "d0:73:d5:01:83:08": "Light Bulbs LiFX Smart Bulb",#Electronic Switch
+    "18:b7:9e:02:20:44": "Triby Speaker",#Audio, Invoxia
+    "e0:76:d0:33:bb:85": "PIX-STAR Photo-frame",#PIX-STAR,算什么设备，不知道，算其他吧
+    "70:5a:0f:e4:9b:c0": "HP Printer",#HP，Electronic Switch，算其他吧
+    "08:21:ef:3b:fc:e3": "Non-Iot",#
     "40:f3:08:ff:1e:da": "Non-Iot",
     "74:2f:68:81:69:42": "Non-Iot",
     "ac:bc:32:d4:6f:2f": "Non-Iot",
@@ -107,14 +107,68 @@ Mac2DeviceName = {
     "d0:a6:37:df:a1:e1": "Non-Iot",
     "f4:5c:89:93:cc:85": "Non-Iot"
 }
+DeviceMac2Type={
+"d0:52:a8:00:67:5e": "Audio",
+    "44:65:0d:56:cc:d3": "Audio",
+    "70:ee:50:18:34:43": "Camera",
+    "f4:f2:6d:93:51:f1": "Camera",
+    "00:16:6c:ab:6b:88": "Camera",
+    "30:8c:fb:2f:e4:b2": "Camera",
+    "00:62:6e:51:27:2e": "Camera",
+    "00:24:e4:11:18:a8": "Camera",# 法国公司
+    "ec:1a:59:79:f4:89": "Electronic Switch",#,贝尔金公司
+    "50:c7:bf:00:56:39": "Electronic Switch",#Electronic Switch,
+    "74:c6:3b:29:d7:1d": "Electronic Switch",#Electronic Switch,
+    "ec:1a:59:83:28:11": "Sensor",#Sensor
+    "18:b4:30:25:be:e4": "Sensor",#Sensor
+    "70:ee:50:03:b8:ac": "Sensor",#Sensor
+    "00:24:e4:1b:6f:96": "Sensor",#Sensor
+    "74:6a:89:00:2e:25": "Sensor",#Sensor
+    "00:24:e4:20:28:c6": "Sensor",#Sensor
+    "d0:73:d5:01:83:08": "Electronic Switch",#Electronic Switch
+    "18:b7:9e:02:20:44": "Audio",#Audio, Invoxia
+    "e0:76:d0:33:bb:85": "Others",#PIX-STAR,
+    "70:5a:0f:e4:9b:c0": "Others",#HP
+}
+Vendor2DeviceMac={
+    'Samsung':['d0:52:a8:00:67:5e','00:16:6c:ab:6b:88'],#三星
+    'Amazon':['44:65:0d:56:cc:d3'],
+    'Netatmo':['70:ee:50:18:34:43',"70:ee:50:03:b8:ac"],
+    'TP-Link':['f4:f2:6d:93:51:f1','50:c7:bf:00:56:39'],
+    'NEST':['30:8c:fb:2f:e4:b2','18:b4:30:25:be:e4'],#Dropcam已被google子公司nest收购，因此放到NEST里
+    'Insteon':['00:62:6e:51:27:2e'],#2022年4月倒闭
+    'Withings':['00:24:e4:11:18:a8','00:24:e4:1b:6f:96','00:24:e4:20:28:c6'],#法国公司
+    'Belkin':['ec:1a:59:79:f4:89','ec:1a:59:83:28:11'],#贝尔金公司
+    "iHome":["74:c6:3b:29:d7:1d",],
+    'Blipcare':['74:6a:89:00:2e:25'],
+    'LIFX':['d0:73:d5:01:83:08'],
+    'Invoxia':['18:b7:9e:02:20:44'],
+    'PIX-STAR':['e0:76:d0:33:bb:85'],
+    'HP':['70:5a:0f:e4:9b:c0']
+}
 
-IotNum = 22
+def printIoTDevice():
+    import pandas as pd
+    data = {"Vendor":[],"Device":[],"Type":[]}
+    for vendor,macList in Vendor2DeviceMac.items():
+        for mac in macList:
+            data['Vendor'].append(vendor)
+            data['Device'].append(Mac2DeviceName[mac])
+            data['Type'].append(DeviceMac2Type[mac])
+
+    info = pd.DataFrame(data)
+    csv_data = info.to_csv('Data.csv')
+    print('\nCSV String Values:\n', csv_data)
+
+
+
+IotNum = 21
 
 LanMac = "14:cc:20:51:33:ea"
 
 Mac2FlowList = dict()  # <macaddress,该设备下所有的流 每个流一个包长序列>
 
-FeatureNum = 7
+FeatureNum = 8
 
 
 def getFiles(dir, suffix):  # 查找根目录，文件后缀
@@ -129,8 +183,7 @@ def getFiles(dir, suffix):  # 查找根目录，文件后缀
 
 def loadDataset():
     '''
-    :return: data,一行是一个流的包长序列
-    label：data对应行的设备类型
+    :return: data,一行是一个流的包长序列；label：data对应行的设备类型
     '''
     extensions = ["eth.src", "eth.dst"]
     file_dir = r"../../../../DataSet/DataSet/IoT identification/TMC2018/TMC2018/test"
@@ -152,21 +205,11 @@ def loadDataset():
                 Mac2FlowList[deviceMac] = []
             Mac2FlowList[deviceMac].append(payloadLenList)
 
-    # 因为Non-IoT流少，IoT流多，所以对IoT流进行欠采样，使其总数目与Non-IoT保持一致
-    flowNumIot = 0
-    flowNumNonIot = 0
-    for deviceMac, pktLensList in Mac2FlowList.items():
-        if Mac2Label[deviceMac] == 0:
-            flowNumIot += len(pktLensList)
-        else:
-            flowNumNonIot += len(pktLensList)
-    dec = (flowNumNonIot / flowNumIot)  # Non-Iot设备的总流数目占Iot设备总流数目的几分之几，后面对每个Iot设备，以dec的概率选择样本
     data = []
     label = []
     for deviceMac, pktLensList in Mac2FlowList.items():
         for pktLens in pktLensList:
-            # 胡伟业：for pktLens in random.sample(pktLensList,int(dec*len(pktLensList))):# 对IoT设备的流量进行欠采样
-            from Routers import utils
+            #from Routers.utils import feature_extract
             data.append(feature_extract(pktLens))
             label.append(Mac2Label[deviceMac])
     return np.array(data), np.array(label)
@@ -182,7 +225,9 @@ def feature_trace(trace: list):
     feature[3] = np.median(np.absolute(trace - np.mean(trace)))
     feature[4] = np.std(trace)
     feature[5] = np.var(trace)
-    feature[6] = len(trace)
+    from scipy.stats import skew, kurtosis
+    feature[6] = skew(trace)
+    feature[7] = len(trace)
     return feature
 
 def feature_extract(pkt_length_sequence):  # 根据包长序列返回特征向量
@@ -206,7 +251,25 @@ def classifyIot(data: np.ndarray, label: np.ndarray):
     y_predict = rfc.predict(X_test)
     maxtrix = confusion_matrix(y_test, y_predict, labels=[0, 1], normalize='true')
     print(maxtrix)
-    print(rfc.feature_importances_)  # 输出这个就可以得到特征重要性，但是只有数值，不具有可读性
+    from sklearn.metrics import precision_score,recall_score,f1_score
+    print(precision_score(y_test, y_predict))
+    print(recall_score(y_test, y_predict, average='micro'))
+    print(f1_score(y_test, y_predict, average='weighted'))
+
+    import pandas as pd
+    features = ['最小值','最大值','平均数','中位数','标准差','方差','偏度','包数目']
+    feature_importances = rfc.feature_importances_
+    features_df = pd.DataFrame({'Features': features, 'Importance': feature_importances})
+    features_df.sort_values('Importance', inplace=True, ascending=False)
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 解决中文显示问题
+    plt.rcParams['axes.unicode_minus'] = False  # 解决中文显示问题
+    sns.barplot(features_df['Features'][:10], features_df['Importance'][:10], )
+    plt.xlabel('特征')
+    plt.ylabel('特征重要程度')
+    # 数据可视化：柱状图
+    sns.despine(bottom=True)
+    plt.show()
+
     disp = ConfusionMatrixDisplay(confusion_matrix=maxtrix, display_labels=['Iot', 'Non-Iot'])
     disp.plot(cmap='Greens')
     plt.show()
@@ -229,71 +292,92 @@ def classifyIot(data: np.ndarray, label: np.ndarray):
 
 
 def myDrawing():  # 画出不同IoT设备包数的分布
-    # 图1：全部设备的流数目的分布饼状图（实际上因为文字重叠不好看，有部分没显示）
-    def pieChart():
-        flowNumList = []  # 22个物联网和非物联网设备，共23个元素
-        macLabel = []
-        NonIotNum = 0
-        for mac, deviceName in Mac2DeviceName.items():
-            if mac not in Mac2FlowList.keys():
-                print("not exist device:", mac)
-                continue
-            print("the flow number of {} is {}".format(Mac2DeviceName[mac], len(Mac2FlowList[mac])))
-            if Mac2Label[mac] == 0:
-                flowNumList.append(len(Mac2FlowList[mac]))
-                macLabel.append(deviceName)
+    # 图1：做5个IoT设备和Non-IoT设备的一条流中的包数频数分布图
+    sampleMac2Name = {
+        "d0:73:d5:01:83:08": "Light Bulbs LiFX Smart Bulb",  # 智能灯泡，能源设备
+        "70:5a:0f:e4:9b:c0": "HP Printer",  # 打印机，办公设备
+        "44:65:0d:56:cc:d3": "Amazon Echo",  # 控制设备
+        "70:ee:50:03:b8:ac": "Netatmo weather station",  # 传感器设备
+        "f4:f2:6d:93:51:f1": "TP-Link Day Night Cloud camera",  # 视频设备
+        "40:f3:08:ff:1e:da": "Non-Iot",
+        "74:2f:68:81:69:42": "Non-Iot",
+        "ac:bc:32:d4:6f:2f": "Non-Iot",
+        "b4:ce:f6:a7:a3:c2": "Non-Iot",
+        "d0:a6:37:df:a1:e1": "Non-Iot",
+        "f4:5c:89:93:cc:85": "Non-Iot",
+    }
+    NonIoTpktLenList=[]
+    IoTpktLenList=[]
+    for deviceMac, pktLensList in Mac2FlowList.items():
+        if deviceMac in sampleMac2Name.keys():
+            if sampleMac2Name[deviceMac]=='Non-Iot':
+                for pktLens in pktLensList:
+                    for pktLen in pktLens:
+                        NonIoTpktLenList.append(abs(pktLen))
             else:
-                NonIotNum += len(Mac2FlowList[mac])
-        flowNumList.append(NonIotNum)
-        macLabel.append("Non-Iot")
+                for pktLens in pktLensList:
+                    for pktLen in pktLens:
+                        IoTpktLenList.append(abs(pktLen))
+    #drawHist(NonIoTpktLenList,IoTpktLenList)
 
-        plt.figure(figsize=(20, 10))
-        plt.pie(flowNumList, labels=macLabel, autopct='%3.1f%%', pctdistance=0.8)
-        plt.title('Iot设备流数目占比图')  # 加标题
-        plt.show()
-
-    # 图2：做5个IoT设备和Non-IoT设备的包数目占比饼状图，为了说明实际情况下非IoT流量远远大于IoT
-    def histoGram():
-        sampleMac2Name = {
-            "d0:73:d5:01:83:08": "Light Bulbs LiFX Smart Bulb",  # 智能灯泡，能源设备
-            "70:5a:0f:e4:9b:c0": "HP Printer",  # 打印机，办公设备
-            "44:65:0d:56:cc:d3": "Amazon Echo",  # 控制设备
-            "70:ee:50:03:b8:ac": "Netatmo weather station",  # 传感器设备
-            "f4:f2:6d:93:51:f1": "TP-Link Day Night Cloud camera",  # 视频设备
-            "40:f3:08:ff:1e:da": "Non-Iot",
-            "74:2f:68:81:69:42": "Non-Iot",
-            "ac:bc:32:d4:6f:2f": "Non-Iot",
-            "b4:ce:f6:a7:a3:c2": "Non-Iot",
-            "d0:a6:37:df:a1:e1": "Non-Iot",
-            "f4:5c:89:93:cc:85": "Non-Iot",
-        }
-        flowNumList = []
-        macLabel = []
-        NonIotNum = 0
-        for mac, deviceName in sampleMac2Name.items():
-            if Mac2Label[mac] == 0:
-                flowNumList.append((len(Mac2FlowList[mac]) if mac in Mac2FlowList.keys() else 0))
-                macLabel.append(deviceName)
+    NonIoTFlowPktNum=[]
+    IoTFlowPktNum=[]
+    for deviceMac, pktLensList in Mac2FlowList.items():
+        if deviceMac in Mac2DeviceName.keys():
+            if Mac2DeviceName[deviceMac]=='Non-Iot':
+                for pktLens in pktLensList:
+                    NonIoTFlowPktNum.append(len(pktLens))
             else:
-                NonIotNum += (len(Mac2FlowList[mac]) if mac in Mac2FlowList.keys() else 0)
-        flowNumList.append(NonIotNum)
-        macLabel.append("Non-Iot")
+                for pktLens in pktLensList:
+                    IoTFlowPktNum.append(len(pktLens))
+    #drawBar(NonIoTFlowPktNum,IoTFlowPktNum)
 
-        plt.pie(flowNumList, labels=macLabel, autopct='%3.1f%%')
-        plt.title('Iot设备流数目占比图')  # 加标题
-        plt.show()
-        # 做包长折线图
 
-    # 图3：做5个IoT设备和Non-IoT设备的包数目随时间的折线图，为了说明同一时刻下非IoT包数目总是大于IoT
 
-    # 图4：做IoT和Non-IoT的包长区间频数统计图，为了说明用包长可以区分IoT和非IoT
+def drawBar(data1,data2):
+    import matplotlib.pyplot as plt
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 解决中文显示问题
+    plt.rcParams['axes.unicode_minus'] = False  # 解决中文显示问题
+    y1 = []
+    for i in range(0,40):
+        y1.append(data1.count(i))
 
-    #图5：做IoT和非IoT流持续时间统计图
+    y2=[]
+    for i in range(0,40):
+        y2.append(data2.count(i))
 
-    #图6：做IoT设备的每条流里包的个数的分布图
+    plt.scatter(range(0,40), y1,label="Non-IoT")
+    plt.scatter(range(0,40),y2,c='red',marker='*',label='IoT')
+    plt.xlabel("一条流的包数目")
+    plt.ylabel("流数目")
+    plt.title("流内包数目统计图")
+    plt.legend(loc='best')
+    plt.show()
+
+
+
+def drawHist(dist_data_1,dist_data_2):
+    fig, axes = plt.subplots(1, 2)
+    # 生成2*2的画布
+    plt.subplot(1, 2, 1)
+
+    # 画布中的第一张图
+    sns.distplot(dist_data_1, ax=axes[0])
+    axes[0].set_title("Non-IoT设备包长分布")
+    axes[0].set_xlabel("packet length/bytes")
+
+    plt.subplot(1, 2, 2)
+    sns.distplot(dist_data_2, ax=axes[1])
+    axes[1].set_title("IoT设备包长分布")
+    axes[1].set_xlabel("packet length/bytes")
+    plt.show()
+
 
 
 if __name__ == '__main__':
-    data, label = loadDataset()
-    myDrawing()  # 对样本占比做饼状图
-    classifyIot(data, label)
+    printIoTDevice()
+
+    def test_utils():
+        data, label = loadDataset()
+        myDrawing()  # 对样本占比做饼状图
+        classifyIot(data, label)

@@ -19,24 +19,25 @@ Mac2Label = {
     "50:c7:bf:00:56:39": 9,  # TP-Link Smart plug
     "74:c6:3b:29:d7:1d": 10,  # iHome
     "ec:1a:59:83:28:11": 11,  # Belkin wemo motion sensor
-    "18:b4:30:25:be:e4": 12,  # NEST Protect smoke alarm
-    "70:ee:50:03:b8:ac": 13,  # Netatmo weather station
-    "00:24:e4:1b:6f:96": 14,  # Withings Smart scale
-    "74:6a:89:00:2e:25": 15,  # Blipcare Blood Pressure meter
-    "00:24:e4:20:28:c6": 16,  # Withings Aura smart sleep sensor
-    "d0:73:d5:01:83:08": 17,  # Light Bulbs LiFX Smart Bulb
-    "18:b7:9e:02:20:44": 18,  # Triby Speaker
-    "e0:76:d0:33:bb:85": 19,  # PIX-STAR Photo-frame
-    "70:5a:0f:e4:9b:c0": 20,  # HP Printer
-    "08:21:ef:3b:fc:e3": 21,  # Samsung Galaxy Tab
+    #"18:b4:30:25:be:e4": 12,  # NEST Protect smoke alarm
+    "70:ee:50:03:b8:ac": 12,  # Netatmo weather station
+    "00:24:e4:1b:6f:96": 13,  # Withings Smart scale
+    #"74:6a:89:00:2e:25": 15,  # Blipcare Blood Pressure meter
+    "00:24:e4:20:28:c6": 14,  # Withings Aura smart sleep sensor
+    "d0:73:d5:01:83:08": 15,  # Light Bulbs LiFX Smart Bulb
+    "18:b7:9e:02:20:44": 16,  # Triby Speaker
+    "e0:76:d0:33:bb:85": 17,  # PIX-STAR Photo-frame
+    "70:5a:0f:e4:9b:c0": 18,  # HP Printer
+    "08:21:ef:3b:fc:e3": 19,  # Samsung Galaxy Tab
 }
 LanMac = "14:cc:20:51:33:ea"
-SeqLen = 8  # 灰度图的行数
-EmbeddingSize = 150  # 灰度图的列数，SeqLen*EmbeddingSize需要等于2_Process2Session.ps1文件里的截取长度
+SeqLen = 10  # 灰度图的行数
+EmbeddingSize = 120  # 灰度图的列数，SeqLen*EmbeddingSize需要等于2_Process2Session.ps1文件里的截取长度
 LabelNum = len(Mac2Label)
-DataFilePath = r'D:\Documents\shj\胡伟业我的\iie\PytorchProject\Pytorch\data/TMC2018_payload_data.csv'
-LabelFilePath = r'D:\Documents\shj\胡伟业我的\iie\PytorchProject\Pytorch\data/TMC2018_payload_label.csv'
-rareDevice=[5,9,10,12,14,15,18,20]#所有原来的样本数小于百分之一的样本
+OriginDataFilePath = r'D:\Documents\shj\胡伟业我的\iie\PytorchProject\Pytorch\data/origin_data-X.csv'
+OriginLabelFilePath = r'D:\Documents\shj\胡伟业我的\iie\PytorchProject\Pytorch\data/origin_label-X.csv'
+rareDevice = [5, 9, 10, 13, 16, 18]  # 所有原来的样本数小于百分之一的样本
+denseDevice = [1, 11]
 
 # def getSessionSample(filename, width):
 #     with open(filename, 'rb') as f:
@@ -135,37 +136,42 @@ def genData():
     label = label.reshape(-1, 1)
     print("data's shape=", data.shape)
     print("label's shape=", label.shape)
-    np.savetxt(DataFilePath, data, delimiter=',')
-    np.savetxt(LabelFilePath, label, delimiter=',')
+    np.savetxt(OriginDataFilePath, data, delimiter=',')
+    np.savetxt(OriginLabelFilePath, label, delimiter=',')
 
 
 class TestSklearn(unittest.TestCase):
     def test_utils(self):
         genData()
-    def test_augement(self):#用于数据增强
-        pass
+
     def test_sample(self):
         '''
         打印样本情况，用于说明样本分布不均衡的问题
         :return:
         '''
-
         def pieChart():
             import pandas as pd
             import matplotlib.pyplot as plt
             plt.rcParams['font.sans-serif'] = ['SimHei']  # 解决中文显示问题
             plt.rcParams['axes.unicode_minus'] = False  # 解决中文显示问题
-            df_label = pd.read_csv(LabelFilePath, header=None, sep=',', dtype=np.uint8)
+            df_label = pd.read_csv(
+                OriginLabelFilePath,
+                header=None, sep=',', dtype=np.uint8)
             label = df_label.values
-            sampleSum=label.size
+            sampleSum = label.size
+            print("sample num={}".format(sampleSum))
             sampleNumList = []
             for l in range(LabelNum):
                 sampleNumList.append(np.sum(label == l))
-                if sampleNumList[-1]/sampleSum<0.01:#样本占比小于百分之一的认为是小样本
-                    print("label {} sample num={:.3%}".format(l,sampleNumList[-1]/sampleSum))
-
-            plt.figure(figsize=(20, 10))
-            plt.pie(sampleNumList, labels=[i for i in range(LabelNum)], autopct='%3.1f%%', pctdistance=0.8)
-            plt.title('Iot设备流数目占比图')  # 加标题
+                print("Label={} sample num={} pro={:.2%}".format(l, sampleNumList[-1],sampleNumList[-1] / sampleSum))
+                if sampleNumList[-1] / sampleSum < 0.01:  # 样本占比小于百分之一的认为是小样本
+                    print("label {} is rare sample".format(l))
+            sampleNumList=[]
+            explored=[0]*LabelNum
+            for r in rareDevice:
+                explored[r]=0.3
+            from Paper.run import classList
+            plt.pie(sampleNumList, labels=classList, autopct='%.2f%%', pctdistance=0.6,explode=explored)
+            plt.title('Iot设备样本数目饼图')  # 加标题
             plt.show()
         pieChart()

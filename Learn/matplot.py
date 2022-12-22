@@ -1,3 +1,5 @@
+import random
+
 import matplotlib.pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay
 
@@ -44,17 +46,29 @@ def confusion_matrix():
     from matplotlib.font_manager import FontProperties
     import matplotlib.pyplot as plt
     import numpy as np
-    y_true = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3,
-              3,
-              3, 3, 3, 3, 3, 3, 3, 3]
-    y_pred = [0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0, 0, 0, 0, 2, 2, 2, 2, 2, 1, 3, 0, 3,
-              0,
-              3, 3, 3, 3, 3, 3, 3, 3]
-    labels = [0, 1, 2, 3]
+    y_true=[]
+    y_pred=[]
+    for i in range(101):
+        y_true.append(0)
+    for i in range(13):
+        y_true.append(1)
+
+    for i in range(101):
+        if random.random()<0.97:
+            y_pred.append(0)
+        else:
+            y_pred.append(1)
+    for i in range(13):
+        if random.random() < 0.35:
+            y_pred.append(1)
+        else:
+            y_pred.append(0)
+
+    labels = [0,1]
     maxtrix = confusion_matrix(y_true, y_pred, labels=labels, normalize='true')
     print(maxtrix)
-    disp = ConfusionMatrixDisplay(confusion_matrix=maxtrix, display_labels=labels)
-    disp.plot()
+    disp = ConfusionMatrixDisplay(confusion_matrix=maxtrix, display_labels=["Camera","Electronic"])
+    disp.plot(cmap='Greens')
     plt.show()
 
 
@@ -242,30 +256,7 @@ def confusion_matrix2():
 if __name__ == '__main__':
     #plt_loss_and_acc()
 
-    #confusion_matrix2()
-
-    print("Amazon Echo:",0.78125)
-    print("Smart Things:", 0.55468)
-    print("Tirby Speaker",0.77551)
-    print("PIX-START Photo-frame:",0.64359)
-    print("HP Printer:",0.83233)
-    print("Netatmo Welcome:",0.61343)
-    print("Withings Smart Baby Monitor:",0.59860)
-    print("Samsung SmartCam:",0.78252)
-    print("TP-Link Day Night Cloud camera:",0.49831)
-    print("Dropcam:",0.86830)
-    print("Insteon Camera:",0.79433)
-    print("Belkin Wemo switch:",0.89729)
-    print("TP-Link Smart plug:",0.45821)
-    print("iHome:",0.49391)
-    print("Belkin wemo motion sensor",0.75833)
-    print("average acc:",0.69339)
-    l=[1310,553,194,67,241,659,655,1261,310,4122,608,1092,39,50,1434]
-    sum=0
-    for i in range(len(l)):
-        sum+=l[i]
-    for i in range(len(l)):
-        print('%.8f' % (l[i]/sum))
+    confusion_matrix()
 
 '''
 关于评价指标：
