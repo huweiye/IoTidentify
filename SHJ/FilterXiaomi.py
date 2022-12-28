@@ -2,12 +2,8 @@
 # -*- coding:utf-8 -*-
 import json
 import os
-import re
-import traceback
-
 import requests
 from flowcontainer.extractor import extract
-from SHJ import utils
 
 XiaomiMacSet=set()
 visitedMac=set()
@@ -27,7 +23,7 @@ def isXiaomi(url:str)->bool:
     import re
     p = re.compile('XIAOMI', re.IGNORECASE)
     if p.search(res.text):#mac地址查厂商是小米的设备
-        print(res.text)
+        print(url)
         return True
     else:
         return False
@@ -57,22 +53,18 @@ def getXiaomiMac(file:str,suff:str):
     else:#处理的是log文件
         with open(file,"rb") as file_obj:
             try:
-                for line in file_obj.readlines():
-                    line=str(line)
-                    if line.find(SRCMAC)!=-1:
-                        srcMac= line[line.find(SRCMAC) + len(SRCMAC) + 3:line.find(SRCMAC) + len(SRCMAC) + 3 + 17]
-                        if srcMac in visitedMac:
-                            continue
-                        if isXiaomi(macURL +srcMac):  # 源mac是小米设备
-                            XiaomiMacSet.add(srcMac)
-                        visitedMac.add(srcMac)
-                    if line.find(DSTMAC)!=-1:
-                        dstMac=(line[line.find(DSTMAC) + len(DSTMAC) + 3:line.find(DSTMAC) + len(DSTMAC) + 3 + 17])
-                        if dstMac in visitedMac:
-                            continue
-                        if isXiaomi(macURL +dstMac):  # 源mac是小米设备
-                            XiaomiMacSet.add(dstMac)
-                        visitedMac.add(dstMac)
+                for streamStr in file_obj.readlines():#对于组里的log文件，一行就是一个json
+                    streamDict = json.loads(streamStr)
+                    if streamDict[SRCMAC] not in visitedMac:
+                        print(streamDict[SRCMAC])
+                        if isXiaomi(macURL + streamDict[SRCMAC]):  # 源mac是小米设备
+                            XiaomiMacSet.add(streamDict[SRCMAC])
+                        visitedMac.add(streamDict[SRCMAC])
+                    if streamDict[DSTMAC] not in visitedMac:
+                        print(streamDict[DSTMAC])
+                        if isXiaomi(macURL + streamDict[DSTMAC]):  # 目的mac是小米设备
+                            XiaomiMacSet.add(streamDict[DSTMAC])
+                        visitedMac.add(streamDict[DSTMAC])
             except Exception as e:
                 print(e,file)
 
@@ -89,3 +81,10 @@ def printXiaomiMac(dir:str):
     with open('Xiaomimac.txt', 'a+') as f:
         for mac in XiaomiMacSet:
             f.write(mac+"\n")
+
+if __name__ == '__main__':
+    dir = r"D:\29205workspace\Goolgle下载\数据(0)"
+    dirlist = os.listdir(dir)
+    for name in dirlist:
+        if os.path.isdir(os.path.join(dir, name)):
+            printXiaomiMac(os.path.join(dir, name))

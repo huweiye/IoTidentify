@@ -31,6 +31,6 @@ class TestSklearn(unittest.TestCase):
         IoTANDNonIoT.ClassifyIoTAndNonIoT(data, label)
 
     def test_filterXiaomi(self):
-        dir=r"D:\29205workspace\Goolgle下载\数据(0)\20210804"
+        dir=r"D:\29205workspace\Goolgle下载\数据(0)\20211013"
         from SHJ import FilterXiaomi
         FilterXiaomi.printXiaomiMac(dir)
