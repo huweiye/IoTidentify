@@ -34,3 +34,7 @@ class TestSklearn(unittest.TestCase):
         dir=r"D:\29205workspace\Goolgle下载\数据(0)\20211013"
         from SHJ import FilterXiaomi
         FilterXiaomi.printXiaomiMac(dir)
+
+    def test_genXiaomiData(self):
+        from SHJ import genPayloadData
+        genPayloadData.genData()

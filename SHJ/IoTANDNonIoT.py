@@ -131,6 +131,15 @@ def GenData(file_dir:str):
     for deviceMac,pktLensList in Mac2FlowList.items():
         print("device {} sample count= {},which proportion={:.1%}".format(deviceMac,len(pktLensList),len(pktLensList)/data.shape[0]))
 
+def drawPktLenDis(data: np.ndarray, label: np.ndarray):
+    '''
+    做物联网设备和非物联网设备的包长分布图
+    :return:
+    '''
+    data = data.reshape(-1, FeatureNum)
+    label = label.reshape(label.size)
+
+
 def ClassifyIoTAndNonIoT(data: np.ndarray, label: np.ndarray):
     data = data.reshape(-1, FeatureNum)
     label = label.reshape(label.size)
@@ -154,6 +163,6 @@ def ClassifyIoTAndNonIoT(data: np.ndarray, label: np.ndarray):
     print(f1_score(y_test, y_predict, average='weighted'))
     #展示特征重要性
     f, ax = plt.subplots(figsize=(7, 5))
-    ax.bar(range(len(rfc.feature_importances_)), rfc.feature_importances_)
+    ax.bar(["最小值","最大值","平均值","中位数","标准差","方差","偏度","包数目"], rfc.feature_importances_)
     ax.set_title("Feature Importances")
     plt.show()
